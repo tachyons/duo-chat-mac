@@ -6,12 +6,28 @@
 //
 
 import SwiftUI
+import Combine
+import Foundation
+import AuthenticationServices
+import WebKit
+
 
 @main
 struct duo_chatApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
+    @StateObject private var authService = AuthenticationService()
+    @StateObject private var chatService = ChatService()
+        
+        var body: some Scene {
+            WindowGroup {
+                ContentView()
+                    .environmentObject(authService)
+                    .environmentObject(chatService)
+                    .frame(minWidth: 900, minHeight: 600)
+                    .onAppear() {
+                        chatService.setAuthService(authService: authService)
+                    }
+            }
+            .windowStyle(.titleBar)
+            .windowToolbarStyle(.unified)
         }
-    }
 }

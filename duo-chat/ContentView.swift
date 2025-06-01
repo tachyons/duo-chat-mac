@@ -8,14 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var authService: AuthenticationService
+    @EnvironmentObject var chatService: ChatService
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Group {
+            if authService.isAuthenticated {
+                ChatView()
+                    .transition(.opacity)
+            } else {
+                AuthenticationView()
+                    .transition(.opacity)
+            }
         }
-        .padding()
+        .animation(.easeInOut(duration: 0.3), value: authService.isAuthenticated)
     }
 }
 
