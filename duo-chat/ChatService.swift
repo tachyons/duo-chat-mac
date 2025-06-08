@@ -33,25 +33,24 @@ class ChatService: ObservableObject {
     }
     
     func setAuthService(authService: AuthenticationService) {
-            self.authService = authService
-            
-            // Automatically load initial data when auth service is set and user is authenticated
-            if authService.isAuthenticated {
-                Task {
-                    await loadInitialData()
-                }
+        self.authService = authService
+        
+        // Automatically load initial data when auth service is set and user is authenticated
+        if authService.isAuthenticated {
+            Task {
+                await loadInitialData()
             }
         }
+    }
         
     
     // MARK: - Public Methods
     
     func loadInitialData() async {
-            await fetchCurrentUser()
-            await loadThreads()
-            await loadContextPresets()
-            await loadSlashCommands()
-        
+        await fetchCurrentUser()
+        await loadThreads()
+        await loadContextPresets()
+        await loadSlashCommands()
     }
     
     func loadThreads() async {
@@ -240,6 +239,49 @@ class ChatService: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    func deleteThread(_ threadID: String) async {
+        do {
+            let mutation = """
+            mutation deleteConversationThread($input: DeleteConversationThreadInput!) {
+                deleteConversationThread(input: $input) {
+                    success
+                    errors
+                }
+            }
+            """
+            
+            let variables = [
+                "input": [
+                    "threadId": threadID
+                ]
+            ]
+            
+            let response: GraphQLResponse<DeleteThreadResponse> = try await executeGraphQLMutation(
+                mutation: mutation,
+                variables: variables
+            )
+            
+            if let errors = response.data.deleteConversationThread.errors, !errors.isEmpty {
+                throw ChatServiceError.deleteThreadFailed(errors.joined(separator: ", "))
+            }
+            
+            if response.data.deleteConversationThread.success {
+                // Remove thread from local state
+                threads.removeAll { $0.id == threadID }
+                // Remove associated messages
+                messages.removeValue(forKey: threadID)
+                
+                print("✅ Successfully deleted thread \(threadID)")
+            } else {
+                throw ChatServiceError.deleteThreadFailed("Delete operation returned false")
+            }
+            
+        } catch {
+            self.error = error as? ChatServiceError ?? .deleteThreadFailed(error.localizedDescription)
+            print("❌ Failed to delete thread \(threadID): \(error)")
+        }
     }
     
     func startNewConversation() {
@@ -507,9 +549,19 @@ class ChatService: ObservableObject {
     }
     
     private func parseDate(_ dateString: String?) -> Date? {
+        guard let dateString = dateString else { return nil }
         
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         
-        return nil
+        if let date = formatter.date(from: dateString) {
+            return date
+        }
+        
+        // Fallback to a simpler format if the above fails
+        let simpleDateFormatter = DateFormatter()
+        simpleDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        return simpleDateFormatter.date(from: dateString)
     }
     
     private func getCurrentPageURL() -> String {
@@ -613,6 +665,15 @@ struct SlashCommandsResponse: Codable {
     let aiSlashCommands: [SlashCommand]?
 }
 
+struct DeleteThreadResponse: Codable {
+    let deleteConversationThread: DeleteConversationThreadResult
+    
+    struct DeleteConversationThreadResult: Codable {
+        let success: Bool
+        let errors: [String]?
+    }
+}
+
 // MARK: - Error Types
 
 enum ChatServiceError: LocalizedError {
@@ -631,6 +692,7 @@ enum ChatServiceError: LocalizedError {
     case loadThreadsFailed(String)
     case loadMessagesFailed(String)
     case sendMessageFailed(String)
+    case deleteThreadFailed(String)
     case pollingTimeout
     case unknown(String)
     
@@ -666,6 +728,8 @@ enum ChatServiceError: LocalizedError {
             return "Failed to load messages: \(message)"
         case .sendMessageFailed(let message):
             return "Failed to send message: \(message)"
+        case .deleteThreadFailed(let message):
+            return "Failed to delete conversation: \(message)"
         case .pollingTimeout:
             return "Timeout waiting for AI response."
         case .unknown(let message):

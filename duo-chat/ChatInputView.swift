@@ -43,26 +43,42 @@ struct ChatInputView: View {
                 .controlSize(.small)
                 
                 Spacer()
+                
+                // Helper text
+                Text("⌘⏎ Send • ⇧⏎ New line")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
             
             // Message Input
             HStack(spacing: 12) {
-                TextField(
-                    chatService.duoChatEnabled ? 
-                    "Ask Duo Chat anything..." : 
-                    "Duo Chat is not available for your account",
-                    text: $messageText,
-                    axis: .vertical
-                )
-                .textFieldStyle(.plain)
-                .padding(12)
+                ZStack(alignment: .topLeading) {
+                    if messageText.isEmpty {
+                        Text(chatService.duoChatEnabled ?
+                             "Ask Duo Chat anything..." :
+                             "Duo Chat is not available for your account")
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    
+                    TextEditor(text: $messageText)
+                        .scrollContentBackground(.hidden)
+                        .frame(minHeight: 30, maxHeight: 120)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .focused($isTextFieldFocused)
+                        .disabled(!chatService.duoChatEnabled)
+                        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NSControlTextDidEndEditingNotification"))) { notification in
+                            // Handle text editing notifications if needed
+                        }
+                }
                 .background(.regularMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .focused($isTextFieldFocused)
-                .disabled(!chatService.duoChatEnabled)
-                .onSubmit {
-                    sendMessage()
-                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
                 
                 Button(action: sendMessage) {
                     Image(systemName: chatService.isLoading ? "stop.circle" : "arrow.up.circle.fill")
@@ -71,13 +87,14 @@ struct ChatInputView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!canSendMessage)
+                .keyboardShortcut(.return, modifiers: .command)
             }
         }
     }
     
     private var canSendMessage: Bool {
-        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
-        !chatService.isLoading && 
+        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !chatService.isLoading &&
         chatService.duoChatEnabled
     }
     

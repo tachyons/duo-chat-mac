@@ -13,6 +13,7 @@ struct MarkdownView: View {
     
     var body: some View {
         Markdown(content)
+            .textSelection(.enabled)
     }
 }
 
