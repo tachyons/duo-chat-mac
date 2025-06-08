@@ -1,2 +1,0 @@
-Target dependency graph (1 target)
-Target 'duo-chat' in project 'duo-chat' (no dependencies)
