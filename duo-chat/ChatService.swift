@@ -16,6 +16,8 @@ class ChatService: ObservableObject {
     
     private var currentUser: GitLabUser?
     private weak var authService: AuthenticationService?
+    var onNewThreadCreated: ((String) -> Void)?
+
     
     // Network configuration
     private let session: URLSession
@@ -45,15 +47,11 @@ class ChatService: ObservableObject {
     // MARK: - Public Methods
     
     func loadInitialData() async {
-        do {
             await fetchCurrentUser()
             await loadThreads()
             await loadContextPresets()
             await loadSlashCommands()
-        } catch {
-            self.error = error as? ChatServiceError ?? .unknown(error.localizedDescription)
-            print("❌ Failed to load initial data: \(error)")
-        }
+        
     }
     
     func loadThreads() async {
@@ -65,6 +63,8 @@ class ChatService: ObservableObject {
                         id
                         conversationType
                         createdAt
+                        title,
+                        lastUpdatedAt
                     }
                 }
             }
@@ -76,15 +76,17 @@ class ChatService: ObservableObject {
             self.threads = response.data.aiConversationThreads.nodes.map { thread in
                 ChatThread(
                     id: thread.id,
-                    title: generateThreadTitle(from: thread.id),
+                    title: thread.title ??  "Untitled",
                     conversationType: thread.conversationType,
-//                    createdAt: thread.createdAt
+                    createdAt: thread.createdAt,
+                    lastUpdatedAt: thread.lastUpdatedAt,
                 )
             }
             
             print("✅ Loaded \(threads.count) conversation threads")
             
         } catch {
+            debugPrint(error)
             self.error = error as? ChatServiceError ?? .loadThreadsFailed(error.localizedDescription)
             print("❌ Failed to load threads: \(error)")
         }
@@ -219,10 +221,14 @@ class ChatService: ObservableObject {
                 let newThread = ChatThread(
                     id: actualThreadID,
                     title: String(content.prefix(50)),
-                    conversationType: "DUO_CHAT"
-//                    createdAt: "TODO",
+                    conversationType: "DUO_CHAT",
+                    createdAt: DateFormatter().string(from: Date()),
+                    lastUpdatedAt: DateFormatter().string(from: Date())
                 )
                 threads.insert(newThread, at: 0)
+                
+                // Notify that a new thread was created
+                onNewThreadCreated?(actualThreadID)
             }
             
             // Poll for AI response
@@ -271,7 +277,6 @@ class ChatService: ObservableObject {
             if let questions = response.data.aiChatContextPresets?.questions {
                 contextPresets = questions.enumerated().map { index, question in
                     ContextPreset(
-                        name: "Suggested Question \(index + 1)",
                         prompt: question,
                         category: "context"
                     )
@@ -442,8 +447,6 @@ class ChatService: ObservableObject {
         do {
             let (data, response) = try await session.data(for: request)
             
-         
-            
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw ChatServiceError.invalidResponse
             }
@@ -455,14 +458,10 @@ class ChatService: ObservableObject {
                 await authService.refreshTokenIfNeeded()
                 throw ChatServiceError.authenticationExpired
             }
-            
-            let bodyString = String(data: data, encoding: .utf8)
-            
-            print(bodyString)
+                        
             
             guard httpResponse.statusCode == 200 else {
                 let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
-                print(responseBody)
                 throw ChatServiceError.httpError(httpResponse.statusCode, responseBody)
             }
             
@@ -490,6 +489,7 @@ class ChatService: ObservableObject {
             throw ChatServiceError.networkError(urlError.localizedDescription)
         } catch {
             if error is DecodingError {
+                debugPrint(error)
                 throw ChatServiceError.decodingError(error.localizedDescription)
             }
             throw ChatServiceError.unknown(error.localizedDescription)
@@ -555,7 +555,9 @@ struct ThreadsResponse: Codable {
     struct ThreadNode: Codable {
         let id: String
         let conversationType: String
-//        let createdAt: Date
+        let createdAt: String
+        let title: String?
+        let lastUpdatedAt: String
     }
 }
 

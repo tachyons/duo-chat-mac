@@ -16,9 +16,9 @@ struct ChatHeaderView: View {
                 Text(thread.title)
                     .font(.headline)
                 
-//                Text("Updated \(thread.createdAt, style: .relative)")
-//                    .font(.caption)
-//                    .foregroundColor(.secondary)
+                Text("Updated \(thread.createdAt)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
             Spacer()

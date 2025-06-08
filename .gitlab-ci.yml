@@ -1,0 +1,194 @@
+# .gitlab-ci.yml (Simplified version for unsigned builds)
+stages:
+  - build
+  - package
+  - upload
+
+variables:
+  APP_NAME: "duo-chat"
+  SCHEME_NAME: "duo-chat"
+  CONFIGURATION: "Release"
+  DERIVED_DATA_PATH: "$CI_PROJECT_DIR/DerivedData"
+
+# Cache dependencies and build artifacts
+cache:
+  key: 
+    files:
+      - duo-chat.xcodeproj/project.pbxproj
+      - duo-chat.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+  paths:
+    - DerivedData/
+    - ~/Library/Developer/Xcode/DerivedData/
+
+build_app:
+  stage: build
+  tags:
+    - macos
+    - xcode
+  before_script:
+    - echo "Xcode version:"
+    - xcodebuild -version
+    - echo "Available schemes:"
+    - xcodebuild -list -project duo-chat.xcodeproj
+    - echo "Creating build directory"
+    - mkdir -p build
+  script:
+    # Build the project directly (no archiving needed for unsigned builds)
+    - |
+      xcodebuild build \
+        -project duo-chat.xcodeproj \
+        -scheme "$SCHEME_NAME" \
+        -configuration "$CONFIGURATION" \
+        -derivedDataPath "$DERIVED_DATA_PATH" \
+        -destination "generic/platform=macOS" \
+        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGN_IDENTITY="" \
+        PROVISIONING_PROFILE="" \
+        ARCHS=x86_64
+    
+    # Find and copy the built app
+    - |
+      BUILT_APP=$(find "$DERIVED_DATA_PATH" -name "*.app" -type d | head -1)
+      echo "Found built app: $BUILT_APP"
+      cp -R "$BUILT_APP" "build/$APP_NAME.app"
+    
+    # Verify build output
+    - ls -la build/
+    - echo "App bundle info:"
+    - ls -la "build/$APP_NAME.app/Contents/"
+    - file "build/$APP_NAME.app/Contents/MacOS/$APP_NAME"
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 hour
+  only:
+    - main
+    - develop
+    - merge_requests
+    - tags
+
+create_packages:
+  stage: package
+  tags:
+    - macos
+  dependencies:
+    - build_app
+  script:
+    - echo "Creating distribution packages"
+    - cd build
+    - |
+      zip -r "../build/duo-chat.zip" "$APP_NAME.app" \
+        -x "*.DS_Store" "*/__pycache__/*" "*/.*"
+    - |
+      echo "Creating DMG..."
+      hdiutil create \
+        -volname "$APP_NAME" \
+        -srcfolder "$APP_NAME.app" \
+        -ov \
+        -format UDZO \
+        "../build/duo-chat.dmg"
+    - cd ..
+    - |
+      cd build
+      shasum -a 256 *.zip > checksums.txt
+      shasum -a 256 *.dmg >> checksums.txt
+      cd ..
+    - echo "📦 Package contents:"
+    - ls -lah build/
+    - echo "📝 Checksums:"
+    - cat build/checksums.txt
+  artifacts:
+    paths:
+      - build/*.zip
+      - build/*.dmg
+      - build/checksums.txt
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - tags
+
+upload_packages:
+  stage: upload
+  tags:
+    - macos
+  dependencies:
+    - create_packages
+  variables:
+    PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic"
+  script:
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        VERSION="$CI_COMMIT_TAG"
+      else
+        VERSION="${CI_COMMIT_SHORT_SHA}"
+      fi
+      echo "📦 Package version: $VERSION"
+    - |
+      echo "📤 Uploading ZIP package..."
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "build/duo-chat.zip" \
+           --progress-bar \
+           "${PACKAGE_REGISTRY_URL}/${APP_NAME}/${VERSION}/duo-chat-${VERSION}.zip"
+      echo "✅ ZIP uploaded successfully"
+    - |
+      echo "📤 Uploading DMG package..."
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "build/duo-chat.dmg" \
+           --progress-bar \
+           "${PACKAGE_REGISTRY_URL}/${APP_NAME}/${VERSION}/duo-chat-${VERSION}.dmg"
+      echo "✅ DMG uploaded successfully"
+    - |
+      echo "📤 Uploading checksums..."
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "build/checksums.txt" \
+           --progress-bar \
+           "${PACKAGE_REGISTRY_URL}/${APP_NAME}/${VERSION}/checksums.txt"
+      echo "✅ Checksums uploaded successfully"
+    - echo ""
+    - echo "🎉 Packages uploaded to GitLab Generic Package Registry:"
+    - echo "   1. Right-click the app and select 'Open'"
+    - echo "   2. Or go to System Preferences > Security & Privacy to allow it"
+  only:
+    - main
+    - tags
+
+create_release:
+  stage: upload
+  tags:
+    - macos
+  dependencies:
+    - create_packages
+  script:
+    - echo "🏷️  Creating GitLab release for tag $CI_COMMIT_TAG"
+    - |
+      RELEASE_NOTES="## 🚀 Release $CI_COMMIT_TAG
+
+      **Duo Chat** - GitLab AI Chat Client for macOS
+
+      ### 📥 Download Options
+      - **[ZIP Package](${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${APP_NAME}/${CI_COMMIT_TAG}/duo-chat-${CI_COMMIT_TAG}.zip)** - Extract and run
+      - **[DMG Package](${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${APP_NAME}/${CI_COMMIT_TAG}/duo-chat-${CI_COMMIT_TAG}.dmg)** - Disk image installer
+      - **[Checksums](${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${APP_NAME}/${CI_COMMIT_TAG}/checksums.txt)** - File verification
+
+      ### ⚠️ Installation Note
+      This is an unsigned application. On first launch:
+      1. Right-click the app and select **Open**
+      2. Or go to **System Preferences > Security & Privacy** to allow it
+
+      ---
+      Built from commit: \`$CI_COMMIT_SHORT_SHA\`  
+      Build date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+    - |
+      curl --request POST \
+           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --header "Content-Type: application/json" \
+           --data "{
+             \"name\": \"Duo Chat $CI_COMMIT_TAG\",
+             \"tag_name\": \"$CI_COMMIT_TAG\",
+             \"description\": $(echo "$RELEASE_NOTES" | jq -Rs .)
+           }" \
+           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/releases"
+    - echo "✅ Release created successfully"
+  only:
+    - tags

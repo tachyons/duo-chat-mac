@@ -30,22 +30,43 @@ struct ChatDetailView: View {
                     .background(.regularMaterial)
             }
             
-            // Messages
+            // Messages or Welcome State
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        if !chatService.duoChatEnabled {
-                            DuoChatDisabledView()
-                                .padding()
-                        }
-                        
-                        ForEach(currentMessages) { message in
-                            MessageView(message: message)
-                                .id(message.id)
-                        }
-                        
-                        if chatService.isLoading {
-                            LoadingMessageView()
+                        if threadID == nil {
+                            // Welcome state for new conversation
+                            VStack(spacing: 20) {
+                                Image(systemName: "message.badge.waveform")
+                                    .font(.system(size: 60))
+                                    .foregroundColor(.secondary)
+                                
+                                VStack(spacing: 8) {
+                                    Text("Start a New Conversation")
+                                        .font(.title2)
+                                        .fontWeight(.semibold)
+                                    
+                                    Text("Ask Duo Chat anything to begin")
+                                        .font(.body)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding()
+                        } else {
+                            if !chatService.duoChatEnabled {
+                                DuoChatDisabledView()
+                                    .padding()
+                            }
+                            
+                            ForEach(currentMessages) { message in
+                                MessageView(message: message)
+                                    .id(message.id)
+                            }
+                            
+                            if chatService.isLoading {
+                                LoadingMessageView()
+                            }
                         }
                     }
                     .padding()

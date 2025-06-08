@@ -11,6 +11,8 @@ struct ChatThread: Identifiable, Codable {
     let id: String
     let title: String
     let conversationType: String
+    let createdAt: String
+    let lastUpdatedAt: String
 }
 
 struct ChatMessage: Identifiable, Codable {
@@ -30,7 +32,6 @@ enum MessageRole: String, Codable, CaseIterable {
 }
 
 struct ContextPreset: Codable {
-    let name: String
     let prompt: String
     let category: String
 }
