@@ -60,7 +60,7 @@ jobs:
         shasum -a 256 *.zip *.dmg > checksums.txt
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
       with:
         name: duo-chat-${{ steps.version.outputs.version }}
