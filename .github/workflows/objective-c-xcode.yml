@@ -1,30 +1,91 @@
-name: Xcode - Build and Analyze
+name: Build Duo Chat
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+
+env:
+  APP_NAME: "duo-chat"
+  SCHEME_NAME: "duo-chat"
 
 jobs:
-  build:
-    name: Build and analyse default scheme using xcodebuild command
+  build-and-release:
     runs-on: macos-latest
-
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set Default Scheme
-        run: |
-          scheme_list=$(xcodebuild -list -json | tr -d "\n")
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo $default | cat >default
-          echo Using default scheme: $default
-      - name: Build
-        env:
-          scheme: ${{ 'default' }}
-        run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild clean build analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty && exit ${PIPESTATUS[0]}
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Set version
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          echo "version=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Build app
+      run: |
+        mkdir -p build
+        xcodebuild build \
+          -project duo-chat.xcodeproj \
+          -scheme "$SCHEME_NAME" \
+          -configuration Release \
+          -derivedDataPath DerivedData \
+          -destination "generic/platform=macOS" \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGN_IDENTITY="" \
+          PROVISIONING_PROFILE=""
+        
+        # Copy built app
+        BUILT_APP=$(find DerivedData -name "*.app" -type d | head -1)
+        cp -R "$BUILT_APP" "build/$APP_NAME.app"
+        
+        # Create packages
+        cd build
+        zip -r "../$APP_NAME.zip" "$APP_NAME.app"
+        hdiutil create -volname "$APP_NAME" -srcfolder "$APP_NAME.app" -ov -format UDZO "../$APP_NAME.dmg"
+        cd ..
+        
+        # Generate checksums
+        shasum -a 256 *.zip *.dmg > checksums.txt
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      if: github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
+      with:
+        name: duo-chat-${{ steps.version.outputs.version }}
+        path: |
+          *.zip
+          *.dmg
+          checksums.txt
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        name: "Duo Chat ${{ steps.version.outputs.version }}"
+        body: |
+          ## 🚀 Duo Chat ${{ steps.version.outputs.version }}
+          
+          GitLab AI Chat Client for macOS
+          
+          ### Installation
+          ⚠️ This is an unsigned app. Right-click and select "Open" on first launch.
+          
+          Built from: `${{ github.sha }}`
+        files: |
+          *.zip
+          *.dmg
+          checksums.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
