@@ -53,3 +53,7 @@ struct DuoChatDisabledView: View {
         )
     }
 }
+
+#Preview{
+    DuoChatDisabledView()
+}

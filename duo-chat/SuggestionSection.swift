@@ -18,16 +18,15 @@ struct SuggestionSection: View {
                     .font(.headline)
                 
                 LazyVStack(spacing: 4) {
-                    ForEach(items, id: \.name) { preset in
+                    ForEach(items, id: \.prompt) { preset in
                         Button(action: { onSelect(preset) }) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(preset.name)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
+                                
                                 
                                 Text(preset.prompt)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+
                                     .lineLimit(2)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)

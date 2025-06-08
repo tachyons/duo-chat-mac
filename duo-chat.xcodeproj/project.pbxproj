@@ -6,6 +6,24 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D645FD8B2DF13F1E00E457C9 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = D645FD8A2DF13F1E00E457C9 /* MarkdownUI */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		D645FD822DF136E700E457C9 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = folder.iconset;
+			inputFiles = (
+			);
+			isEditable = 1;
+			outputFiles = (
+			);
+			script = "# iconutil\n";
+		};
+/* End PBXBuildRule section */
+
 /* Begin PBXContainerItemProxy section */
 		D6652AB52DEC797200269826 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D645FD8B2DF13F1E00E457C9 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +91,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D645FD872DF13E6D00E457C9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D6652A9D2DEC797000269826 = {
 			isa = PBXGroup;
 			children = (
 				D6652AA82DEC797000269826 /* duo-chat */,
 				D6652AB72DEC797200269826 /* duo-chatTests */,
 				D6652AC12DEC797200269826 /* duo-chatUITests */,
+				D645FD872DF13E6D00E457C9 /* Frameworks */,
 				D6652AA72DEC797000269826 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -104,14 +131,17 @@
 				D6652AA42DEC797000269826 /* Resources */,
 			);
 			buildRules = (
+				D645FD822DF136E700E457C9 /* PBXBuildRule */,
 			);
 			dependencies = (
+				D645FD862DF13AE800E457C9 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				D6652AA82DEC797000269826 /* duo-chat */,
 			);
 			name = "duo-chat";
 			packageProductDependencies = (
+				D645FD8A2DF13F1E00E457C9 /* MarkdownUI */,
 			);
 			productName = "duo-chat";
 			productReference = D6652AA62DEC797000269826 /* duo-chat.app */;
@@ -195,6 +225,10 @@
 			);
 			mainGroup = D6652A9D2DEC797000269826;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D645FD832DF137F000E457C9 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				D645FD842DF1383000E457C9 /* XCRemoteSwiftPackageReference "swift-graphql" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D6652AA72DEC797000269826 /* Products */;
 			projectDirPath = "";
@@ -256,6 +290,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		D645FD862DF13AE800E457C9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = D645FD852DF13AE800E457C9 /* MarkdownUI */;
+		};
 		D6652AB62DEC797200269826 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D6652AA52DEC797000269826 /* duo-chat */;
@@ -395,11 +433,11 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "duo-chat/duo_chat.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4442GNYC57;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Duo Chat";
@@ -427,11 +465,11 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "duo-chat/duo_chat.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 4442GNYC57;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Duo Chat";
@@ -555,6 +593,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D645FD832DF137F000E457C9 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
+		D645FD842DF1383000E457C9 /* XCRemoteSwiftPackageReference "swift-graphql" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maticzav/swift-graphql/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D645FD852DF13AE800E457C9 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D645FD832DF137F000E457C9 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
+		D645FD8A2DF13F1E00E457C9 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D645FD832DF137F000E457C9 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D6652A9E2DEC797000269826 /* Project object */;
 }

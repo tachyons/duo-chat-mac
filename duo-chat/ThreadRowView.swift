@@ -15,9 +15,14 @@ struct ThreadRowView: View {
                 .font(.headline)
                 .lineLimit(1)
             
-//            Text(thread.createdAt, style: .relative)
-//                .font(.caption)
-//                .foregroundColor(.secondary)
+            let lastUpdatedAtDate = DateFormatter().date(from: thread.lastUpdatedAt)
+            if let lastUpdatedAtDate = lastUpdatedAtDate {
+                Text(lastUpdatedAtDate, style: .relative)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+               
+            
         }
         .padding(.vertical, 2)
     }

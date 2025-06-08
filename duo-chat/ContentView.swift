@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var authService: AuthenticationService
     @EnvironmentObject var chatService: ChatService
-    
+
     var body: some View {
         Group {
             if authService.isAuthenticated {
@@ -26,5 +26,12 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    let authService = AuthenticationService()
+    let chatService = ChatService(authService: authService)
+
+    
+    return ContentView()
+        .environmentObject(authService)
+        .environmentObject(chatService)
 }
+

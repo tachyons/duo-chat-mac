@@ -6,14 +6,16 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct MarkdownView: View {
     let content: String
     
     var body: some View {
-        // For now, we'll use a simple text view
-        // In a real app, you'd want to integrate a markdown parsing library
-        Text(content)
-            .textSelection(.enabled)
+        Markdown(content)
     }
+}
+
+#Preview {
+    MarkdownView(content: "Hello, World!")
 }

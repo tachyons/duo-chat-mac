@@ -80,7 +80,7 @@ class AuthenticationService: NSObject, ObservableObject {
     func refreshTokenIfNeeded() async {
         guard let tokenExpiry = tokenExpiry,
               tokenExpiry.timeIntervalSinceNow < 300, // 5 minutes
-              let refreshToken = refreshToken else { return }
+              let _ = refreshToken else { return }
         
         do {
             try await refreshAccessToken()
