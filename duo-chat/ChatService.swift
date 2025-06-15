@@ -78,7 +78,7 @@ class ChatService: ObservableObject {
                     title: thread.title ??  "Untitled",
                     conversationType: thread.conversationType,
                     createdAt: thread.createdAt,
-                    lastUpdatedAt: thread.lastUpdatedAt,
+                    lastUpdatedAt: thread.lastUpdatedAt
                 )
             }
             
