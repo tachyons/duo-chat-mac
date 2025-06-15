@@ -24,7 +24,6 @@ build_app:
   stage: build
   tags:
     - macos
-    - xcode
   before_script:
     - echo "Xcode version:"
     - xcodebuild -version
