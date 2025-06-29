@@ -31,6 +31,7 @@ struct ChatView: View {
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button(action: {
+                    chatService.startNewConversation()
                     selectedThreadID = nil
                     messageText = ""
                     showingSuggestions = false
@@ -45,6 +46,11 @@ struct ChatView: View {
                 Menu {
                     Button("Sign Out", action: authService.signOut)
                     Divider()
+                    Button("Refresh Threads") {
+                        Task {
+                            await chatService.loadThreads()
+                        }
+                    }
                     Button("About") { /* About action */  }
                 } label: {
                     Image(systemName: "person.circle")
@@ -52,7 +58,10 @@ struct ChatView: View {
             }
         }
         .task {
-            await chatService.loadInitialData()
+            // Only load initial data if authenticated
+            if authService.isAuthenticated {
+                await chatService.loadInitialData()
+            }
         }
         .onAppear {
             // Set up callback for new thread creation
@@ -60,8 +69,23 @@ struct ChatView: View {
                 selectedThreadID = newThreadID
             }
         }
+        .onChange(of: authService.isAuthenticated) { _, isAuthenticated in
+            if isAuthenticated {
+                // User just authenticated, load data
+                Task {
+                    await chatService.loadInitialData()
+                }
+            } else {
+                // User signed out, clear state
+                selectedThreadID = nil
+                messageText = ""
+                showingSuggestions = false
+                showingCommands = false
+            }
+        }
     }
 }
+
 #Preview(){
     let authService = AuthenticationService()
     let chatService = ChatService(authService: authService)

@@ -22,13 +22,21 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: authService.isAuthenticated)
+        .alert("Chat Service Error", isPresented: .constant(chatService.error != nil)) {
+            Button("OK") {
+                chatService.error = nil
+            }
+        } message: {
+            if let error = chatService.error {
+                Text(error.localizedDescription)
+            }
+        }
     }
 }
 
 #Preview {
     let authService = AuthenticationService()
     let chatService = ChatService(authService: authService)
-
     
     return ContentView()
         .environmentObject(authService)

@@ -27,16 +27,19 @@ struct ChatMessage: Identifiable, Codable {
 }
 
 enum MessageRole: String, Codable, CaseIterable {
-    case user
-    case assistant
+    case user = "user"
+    case assistant = "assistant"
+    case system = "system"
 }
 
-struct ContextPreset: Codable {
+struct ContextPreset: Identifiable, Codable {
+    let id = UUID()
     let prompt: String
     let category: String
 }
 
-struct SlashCommand: Codable {
+struct SlashCommand: Identifiable, Codable {
+    let id = UUID()
     let name: String
     let description: String
 }

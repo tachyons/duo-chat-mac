@@ -1,3 +1,4 @@
+
 //
 //  ChatDetailView.swift
 //  duo-chat
@@ -36,23 +37,7 @@ struct ChatDetailView: View {
                     LazyVStack(spacing: 16) {
                         if threadID == nil {
                             // Welcome state for new conversation
-                            VStack(spacing: 20) {
-                                Image(systemName: "message.badge.waveform")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.secondary)
-                                
-                                VStack(spacing: 8) {
-                                    Text("Start a New Conversation")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                    
-                                    Text("Ask Duo Chat anything to begin")
-                                        .font(.body)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding()
+                            WelcomeView()
                         } else {
                             if !chatService.duoChatEnabled {
                                 DuoChatDisabledView()
@@ -78,11 +63,19 @@ struct ChatDetailView: View {
                         }
                     }
                 }
+                .onChange(of: chatService.isLoading) { _, isLoading in
+                    // Scroll to bottom when loading starts/stops
+                    if !isLoading, let lastMessage = currentMessages.last {
+                        withAnimation(.easeInOut) {
+                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                        }
+                    }
+                }
             }
             
             Divider()
             
-            // Input Area
+            // Enhanced Input Area with URL Context
             ChatInputView(
                 messageText: $messageText,
                 showingSuggestions: $showingSuggestions,
@@ -92,5 +85,15 @@ struct ChatDetailView: View {
             .padding()
         }
         .background(Color(NSColor.textBackgroundColor))
+        .task(id: threadID) {
+            // Load messages when thread changes
+            if let threadID = threadID {
+                await chatService.loadMessages(for: threadID)
+            }
+        }
+        .onAppear {
+            // Initialize context when view appears
+            chatService.initializeDefaultContext()
+        }
     }
 }
