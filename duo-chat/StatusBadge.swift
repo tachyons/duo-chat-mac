@@ -20,3 +20,7 @@ struct StatusBadge: View {
             .clipShape(Capsule())
     }
 }
+
+#Preview {
+    StatusBadge(title: "String", color: Color.black)
+}

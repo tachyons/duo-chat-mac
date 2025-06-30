@@ -18,5 +18,5 @@ struct MarkdownView: View {
 }
 
 #Preview {
-    MarkdownView(content: "Hello, World!")
+    MarkdownView(content: "#Hello, World!")
 }
