@@ -13,6 +13,8 @@ struct ChatView: View {
     @State private var messageText = ""
     @State private var showingSuggestions = false
     @State private var showingCommands = false
+    @State private var showingAbout = false
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationSplitView {
@@ -51,11 +53,18 @@ struct ChatView: View {
                             await chatService.loadThreads()
                         }
                     }
-                    Button("About") { /* About action */  }
+                    Button("Settings") { showingSettings.toggle() }
+                    Button("About") { showingAbout.toggle() }
                 } label: {
                     Image(systemName: "person.circle")
                 }
             }
+        }
+        .sheet(isPresented: $showingAbout) {
+            AboutView(isShowing: $showingAbout)
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView(isShowing: $showingSettings)
         }
         .task {
             // Only load initial data if authenticated

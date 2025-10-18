@@ -45,6 +45,7 @@ struct ThreadRowView: View {
         // Fallback to a simpler format if the above fails
         let simpleDateFormatter = DateFormatter()
         simpleDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        simpleDateFormatter.timeZone = TimeZone(abbreviation: "UTC") 
         return simpleDateFormatter.date(from: thread.lastUpdatedAt)
     }
 }

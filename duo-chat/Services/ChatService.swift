@@ -72,9 +72,7 @@ class ChatService: ObservableObject {
         await loadSlashCommands()
         initializeDefaultContext()
     }
-    
-    // MARK: - URL Context Management
-    
+
     func setCustomContextURL(_ url: String) {
         customContextURL = url
         analyzeURLContext(url)
@@ -224,7 +222,7 @@ class ChatService: ObservableObject {
         }
         
         let completionQuery = """
-        subscription aiCompletionResponse($userId: UserID, $clientSubscriptionId: String, $aiAction: AiAction, $htmlResponse: Boolean = true) {
+        subscription aiCompletionResponse($userId: UserID, $clientSubscriptionId: String, $aiAction: AiAction) {
           aiCompletionResponse(
             userId: $userId
             aiAction: $aiAction
@@ -233,7 +231,6 @@ class ChatService: ObservableObject {
             id
             requestId
             content
-            contentHtml @include(if: $htmlResponse)
             errors
             role
             threadId
@@ -250,7 +247,6 @@ class ChatService: ObservableObject {
         """
         
         let completionVariables: [String: Any] = [
-            "htmlResponse": true,
             "userId": currentUser.id,
             "aiAction": "CHAT",
             "clientSubscriptionId": clientSubscriptionId
@@ -492,9 +488,9 @@ class ChatService: ObservableObject {
                 errors: errors
             )
             messages[threadId]?.append(newMessage)
-            print("📝 Started new streaming message for thread \(threadId), chunk \(chunkId)")
         }
     }
+
     
     func loadThreads() async {
         do {
@@ -666,7 +662,7 @@ class ChatService: ObservableObject {
             var input: [String: Any] = [
                 "chat": [
                     "content": content,
-                    "resourceId": currentUser.id
+                    "resourceId": currentUser.id,
                 ],
                 "conversationType": "DUO_CHAT",
                 "clientSubscriptionId": clientSubscriptionId

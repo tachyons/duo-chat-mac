@@ -48,16 +48,6 @@ class WebSocketManager: NSObject, ObservableObject {
         
         var request = URLRequest(url: url)
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("websocket", forHTTPHeaderField: "Upgrade")
-        request.setValue("Upgrade", forHTTPHeaderField: "Connection")
-        request.setValue("13", forHTTPHeaderField: "Sec-WebSocket-Version")
-        request.setValue("actioncable-v1-json, actioncable-unsupported", forHTTPHeaderField: "Sec-WebSocket-Protocol")
-        request.setValue("permessage-deflate", forHTTPHeaderField: "Sec-WebSocket-Extensions")
-        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
-        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
-        request.setValue("same-origin", forHTTPHeaderField: "Sec-Fetch-Site")
-        request.setValue("websocket", forHTTPHeaderField: "Sec-Fetch-Mode")
-        request.setValue("websocket", forHTTPHeaderField: "Sec-Fetch-Dest")
         request.setValue(gitlabURL, forHTTPHeaderField: "Origin")
         request.setValue("GitLabDuoChatMac/1.0", forHTTPHeaderField: "User-Agent")
         
