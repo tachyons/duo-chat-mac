@@ -1,4 +1,3 @@
-
 //
 //  ChatDetailView.swift
 //  duo-chat
@@ -38,7 +37,8 @@ struct ChatDetailView: View {
                         if threadID == nil {
                             // Welcome state for new conversation
                             WelcomeView()
-                        } else {
+                        }
+                        else {
                             if !chatService.duoChatEnabled {
                                 DuoChatDisabledView()
                                     .padding()
@@ -96,4 +96,24 @@ struct ChatDetailView: View {
             chatService.initializeDefaultContext()
         }
     }
+}
+
+#Preview {
+    let chatService = ChatService()
+//    chatService.duoChatEnabled = true
+//    chatService.threads = [
+//        ChatThread(id: "1", title: "Test Thread", conversationType: "DUO_CHAT", createdAt: "", lastUpdatedAt: "")
+//    ]
+//    chatService.messages["1"] = [
+//        ChatMessage(id: "msg1", content: "Hello from AI", role: .assistant, timestamp: Date(), threadId: "1", requestId: nil, chunkId: nil, errors: nil),
+//        ChatMessage(id: "msg2", content: "Hello from User", role: .user, timestamp: Date(), threadId: "1", requestId: nil, chunkId: nil, errors: nil)
+//    ]
+
+    ChatDetailView(
+        threadID: "1",
+        messageText: .constant(""),
+        showingSuggestions: .constant(false),
+        showingCommands: .constant(false)
+    )
+    .environmentObject(chatService)
 }

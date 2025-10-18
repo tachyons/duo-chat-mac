@@ -37,3 +37,6 @@ struct LoadingMessageView: View {
         }
     }
 }
+#Preview {
+    LoadingMessageView()
+}

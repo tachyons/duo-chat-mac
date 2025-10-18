@@ -29,5 +29,10 @@ struct duo_chatApp: App {
         }
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified)
+        
+        MenuBarExtra("Duo Chat", systemImage: "message.fill") {
+            MenubarChatView()
+                .environmentObject(chatService)
+        }
     }
 }

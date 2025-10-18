@@ -20,9 +20,11 @@ struct ChatHeaderView: View {
                     .font(.headline)
                     .lineLimit(1)
                 
-                Text("Updated \(formattedDate(thread.lastUpdatedAt))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                if let lastUpdatedDate = parseLastUpdatedDate() {
+                    Text(lastUpdatedDate, style: .time)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             
             Spacer()
@@ -60,6 +62,13 @@ struct ChatHeaderView: View {
         }
     }
     
+    private func parseLastUpdatedDate() -> Date? {
+        let simpleDateFormatter = DateFormatter()
+        simpleDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        simpleDateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        return simpleDateFormatter.date(from: thread.lastUpdatedAt)
+    }
+    
     private func formattedDate(_ dateString: String) -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -73,4 +82,25 @@ struct ChatHeaderView: View {
         
         return dateString
     }
+    
+}
+#Preview{
+    // Create a mock ChatThread
+    let mockThread = ChatThread(
+        id: "1",
+        title: "Mock Chat Thread Title",
+        conversationType: "DUO_CHAT",
+        createdAt: "2025-10-18T10:00:00Z",
+        lastUpdatedAt: "2025-10-18T10:30:00Z"
+    )
+    
+    // Create a mock ChatService
+    let mockChatService = ChatService()
+    mockChatService.duoChatEnabled = true
+    mockChatService.tokenExpiryWarning = false
+    
+    return ChatHeaderView(thread: mockThread)
+        .environmentObject(mockChatService)
+        .padding()
+      
 }

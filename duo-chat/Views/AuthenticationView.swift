@@ -33,7 +33,7 @@ struct AuthenticationView: View {
             }
             
             // Form
-            VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("GitLab Instance URL")
                         .font(.headline)
@@ -89,3 +89,7 @@ struct AuthenticationView: View {
     }
 }
 
+#Preview {
+    AuthenticationView()
+        .environmentObject(AuthenticationService())
+}

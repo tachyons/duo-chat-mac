@@ -45,3 +45,42 @@ struct SuggestionsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
+
+#Preview {
+    let chatService = ChatService()
+    chatService.contextPresets = [
+        ContextPreset(prompt: "How to create a new branch?", category: "git"),
+        ContextPreset(prompt: "What is a merge request?", category: "gitlab")
+    ]
+    chatService.slashCommands = [
+        SlashCommand(name: "ask", description: "Ask a question"),
+        SlashCommand(name: "explain", description: "Explain code")
+    ]
+    
+    return SuggestionsView(
+        showingSuggestions: .constant(true),
+        showingCommands: .constant(false),
+        messageText: .constant("")
+    )
+    .environmentObject(chatService)
+    .frame(width: 400)
+}
+
+#Preview("With Commands") {
+    let chatService = ChatService()
+    chatService.contextPresets = [
+        ContextPreset(prompt: "How to create a new branch?", category: "git")
+    ]
+    chatService.slashCommands = [
+        SlashCommand(name: "ask", description: "Ask a question"),
+        SlashCommand(name: "explain", description: "Explain code")
+    ]
+    
+    return SuggestionsView(
+        showingSuggestions: .constant(false),
+        showingCommands: .constant(true),
+        messageText: .constant("/")
+    )
+    .environmentObject(chatService)
+    .frame(width: 400)
+}

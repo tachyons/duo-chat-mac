@@ -118,19 +118,25 @@ struct FeatureRow: View {
 
 
 
-#Preview("Welcome") {
+#Preview("Welcome"){
     let authService = AuthenticationService()
     let chatService = ChatService(authService: authService)
-    chatService.duoChatEnabled = true
     
-    return WelcomeView()
+    WelcomeView()
         .environmentObject(chatService)
-        .frame(width: 600, height: 500)
 }
 
 
 
 #Preview("Loading") {
     LoadingMessageView()
-        .frame(width: 400, height: 100)
+}
+
+#Preview("Feature Row", traits: .sizeThatFitsLayout) {
+    FeatureRow(
+        icon: "star.fill",
+        title: "Amazing Feature",
+        description: "This is a description of an amazing feature that will blow your mind."
+    )
+    .padding()
 }

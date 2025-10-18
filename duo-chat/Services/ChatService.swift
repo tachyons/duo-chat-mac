@@ -569,6 +569,7 @@ class ChatService: ObservableObject {
             messages[threadID] = threadMessages
             
             print("✅ Loaded \(threadMessages.count) messages for thread \(threadID)")
+            isLoading = false
             
         } catch {
             self.error = error as? ChatServiceError ?? .loadMessagesFailed(error.localizedDescription)

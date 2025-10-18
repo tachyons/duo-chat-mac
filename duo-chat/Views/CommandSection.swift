@@ -45,3 +45,21 @@ struct CommandSection: View {
         }
     }
 }
+
+#Preview {
+    let mockCommands = [
+        SlashCommand(name: "ask", description: "Ask a question"),
+        SlashCommand(name: "explain", description: "Explain code or concept"),
+        SlashCommand(name: "refactor", description: "Refactor selected code")
+    ]
+    
+    return CommandSection(
+        title: "Available Commands",
+        commands: mockCommands,
+        onSelect: { command in
+            print("Selected command: \(command.name)")
+        }
+    )
+    .padding()
+    .frame(width: 300)
+}

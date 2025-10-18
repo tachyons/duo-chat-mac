@@ -308,8 +308,8 @@ struct ContextPresetsView: View {
                 if let projectID = chatService.detectedProjectID {
                     Text(projectID)
                         .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
                         .background(.blue.opacity(0.1), in: Capsule())
                         .foregroundColor(.blue)
                 }
@@ -343,4 +343,41 @@ struct ContextPresetsView: View {
         .padding(12)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
+}
+
+#Preview {
+    let chatService = ChatService()
+    chatService.duoChatEnabled = true
+    chatService.contextPresets = [
+        ContextPreset(prompt: "How do I create a new branch?", category: "context"),
+        ContextPreset(prompt: "What is the current sprint goal?", category: "context")
+    ]
+    chatService.detectedProjectID = "my-org/my-project"
+
+    return ChatInputView(
+        messageText: .constant("Hello"),
+        showingSuggestions: .constant(false),
+        showingCommands: .constant(false),
+        threadID: nil
+    )
+    .environmentObject(chatService)
+}
+
+#Preview("Context Presets") {
+    let chatService = ChatService()
+    chatService.duoChatEnabled = true
+    chatService.contextPresets = [
+        ContextPreset(prompt: "How do I create a new branch?", category: "context"),
+        ContextPreset(prompt: "What is the current sprint goal?", category: "context"),
+        ContextPreset(prompt: "Explain the CI/CD pipeline", category: "context"),
+        ContextPreset(prompt: "Show me recent merge requests", category: "context")
+    ]
+    chatService.detectedProjectID = "my-org/my-project"
+
+    return ContextPresetsView(
+        messageText: .constant("")
+    )
+    .environmentObject(chatService)
+    .padding()
+    .frame(width: 400)
 }

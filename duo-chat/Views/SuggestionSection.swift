@@ -41,3 +41,21 @@ struct SuggestionSection: View {
         }
     }
 }
+
+#Preview {
+    let mockPresets = [
+        ContextPreset(prompt: "How to use Git?", category: "git"),
+        ContextPreset(prompt: "What is a merge request?", category: "gitlab"),
+        ContextPreset(prompt: "Explain CI/CD pipelines", category: "devops")
+    ]
+    
+    return SuggestionSection(
+        title: "Popular Questions",
+        items: mockPresets,
+        onSelect: { preset in
+            print("Selected preset: \(preset.prompt)")
+        }
+    )
+    .padding()
+    .frame(width: 300)
+}

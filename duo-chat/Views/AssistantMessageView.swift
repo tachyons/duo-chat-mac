@@ -24,6 +24,7 @@ struct AssistantMessageView: View {
                     .padding()
                     .background(.regularMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
+                    
                 
                 Text(message.timestamp, style: .time)
                     .font(.caption2)
@@ -32,4 +33,17 @@ struct AssistantMessageView: View {
             .frame(maxWidth: 500, alignment: .leading)
         }
     }
+}
+
+#Preview {
+//    let mockMessage = ChatMessage(
+//        id: UUID().uuidString,
+//        content: "Hello! I am your AI assistant. How can I help you today?",
+//        role: .assistant,
+//        timestamp: Date(),
+//        threadId: "123"
+//    )
+//     AssistantMessageView(message: mockMessage)
+//        .padding()
+//        .previewLayout(.sizeThatFits)
 }

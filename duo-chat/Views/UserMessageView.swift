@@ -24,3 +24,18 @@ struct UserMessageView: View {
         .frame(maxWidth: 400, alignment: .trailing)
     }
 }
+
+#Preview(traits: .sizeThatFitsLayout) {
+    let mockMessage = ChatMessage(
+        id: UUID().uuidString,
+        content: "This is a user message example.",
+        role: .user,
+        timestamp: Date(),
+        threadId: "123",
+        requestId: nil,
+        chunkId: nil,
+        errors: nil
+    )
+    UserMessageView(message: mockMessage)
+        .padding()
+}
