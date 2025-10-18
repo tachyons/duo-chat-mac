@@ -34,5 +34,7 @@ struct duo_chatApp: App {
             MenubarChatView()
                 .environmentObject(chatService)
         }
+        .menuBarExtraStyle(.window)
+
     }
 }
