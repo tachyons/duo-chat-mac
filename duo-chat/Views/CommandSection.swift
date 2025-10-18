@@ -22,7 +22,7 @@ struct CommandSection: View {
                     ForEach(commands, id: \.name) { command in
                         Button(action: { onSelect(command) }) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("/\(command.name)")
+                                Text(command.name)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .monospaced()
@@ -48,9 +48,9 @@ struct CommandSection: View {
 
 #Preview {
     let mockCommands = [
-        SlashCommand(name: "ask", description: "Ask a question"),
-        SlashCommand(name: "explain", description: "Explain code or concept"),
-        SlashCommand(name: "refactor", description: "Refactor selected code")
+        SlashCommand(name: "/ask", description: "Ask a question"),
+        SlashCommand(name: "/explain", description: "Explain code or concept"),
+        SlashCommand(name: "/refactor", description: "Refactor selected code")
     ]
     
     return CommandSection(

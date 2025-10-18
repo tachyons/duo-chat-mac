@@ -32,7 +32,7 @@ struct SuggestionsView: View {
                         title: "⚡ Slash Commands",
                         commands: chatService.slashCommands,
                         onSelect: { command in
-                            messageText = "/\(command.name) "
+                            messageText = command.name
                             showingCommands = false
                         }
                     )
