@@ -12,6 +12,7 @@ import Foundation
 import AuthenticationServices
 import WebKit
 
+
 @main
 struct duo_chatApp: App {
     @StateObject private var authService = AuthenticationService()
