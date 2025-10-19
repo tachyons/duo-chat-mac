@@ -13,42 +13,29 @@ all: build
 
 # Build debug version
 build:
-	@echo "Building $(SCHEME) project (Debug)"
+	@echo "Building $(SCHEME) project (Debug)..."
 	xcodebuild build \
-	  -project $(PROJECT) \
-	  -scheme $(SCHEME) \
-	  -configuration Debug \
-	  -derivedDataPath $(BUILD_DIR) \
-	  CODE_SIGNING_ALLOWED=NO \
-	  CODE_SIGN_IDENTITY="" \
-	  PROVISIONING_PROFILE=""
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-configuration Debug \
+		-derivedDataPath $(BUILD_DIR) \
+		CODE_SIGNING_ALLOWED=NO \
+		CODE_SIGN_IDENTITY="" \
+		PROVISIONING_PROFILE=""
 
 # Build release version
 build-release:
-	@echo "Building $(SCHEME) project (Release) and creating archives..."
+	@echo "Building $(SCHEME) project (Release)..."
 	rm -rf $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)
 	xcodebuild build \
-	  -project $(PROJECT) \
-	  -scheme $(SCHEME) \
-	  -configuration Release \
-	  -derivedDataPath DerivedData \
-	  CODE_SIGNING_ALLOWED=NO \
-	  CODE_SIGN_IDENTITY="" \
-	  PROVISIONING_PROFILE=""
-
-	# Copy built app
-	BUILT_APP=$$(find DerivedData -name "*.app" -type d | head -1)
-	cp -R "$$BUILT_APP" "$(BUILD_DIR)/$(APP_NAME).app"
-
-	# Create packages
-	cd $(BUILD_DIR) && zip -r "../$(APP_NAME).zip" "$(APP_NAME).app"
-	hdiutil create -volname "$(APP_NAME)" -srcfolder "$(BUILD_DIR)/$(APP_NAME).app" -ov -format UDZO "$(APP_NAME).dmg"
-	cd ..
-
-	# Generate checksums
-	shasum -a 256 $(APP_NAME).zip $(APP_NAME).dmg > checksums.txt
-
+		-project $(PROJECT) \
+		-scheme $(SCHEME) \
+		-configuration Release \
+		-derivedDataPath DerivedData \
+		CODE_SIGNING_ALLOWED=NO \
+		CODE_SIGN_IDENTITY="" \
+		PROVISIONING_PROFILE=""
 # Run the application (after building)
 run: build
 	@echo "Running $(APP_NAME)..."
@@ -58,18 +45,23 @@ run: build
 test:
 	@echo "Running unit tests for $(TEST_SCHEME_UNIT)..."
 	xcodebuild test \
-	  -project $(PROJECT) \
-	  -scheme $(TEST_SCHEME_UNIT) \
-	  -destination 'platform=macOS' \
-	  -derivedDataPath $(BUILD_DIR)
+		-project $(PROJECT) \
+		-scheme $(TEST_SCHEME_UNIT) \
+		-destination 'platform=macOS' \
+		-derivedDataPath $(BUILD_DIR) \
+		CODE_SIGNING_ALLOWED=NO \
+		CODE_SIGN_IDENTITY="" \
+		PROVISIONING_PROFILE=""
 
 	@echo "Running UI tests for $(TEST_SCHEME_UI)..."
 	xcodebuild test \
-	  -project $(PROJECT) \
-	  -scheme $(TEST_SCHEME_UI) \
-	  -destination 'platform=macOS' \
-	  -derivedDataPath $(BUILD_DIR)
-
+		-project $(PROJECT) \
+		-scheme $(TEST_SCHEME_UI) \
+		-destination 'platform=macOS' \
+		-derivedDataPath $(BUILD_DIR) \
+		CODE_SIGNING_ALLOWED=NO \
+		CODE_SIGN_IDENTITY="" \
+		PROVISIONING_PROFILE=""
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
