@@ -10,11 +10,12 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var authService: AuthenticationService
     @EnvironmentObject var chatService: ChatService
+    @Binding var selectedThreadID: String?
 
     var body: some View {
         Group {
             if authService.isAuthenticated {
-                ChatView()
+                ChatView(selectedThreadID: $selectedThreadID)
                     .transition(.opacity)
             } else {
                 AuthenticationView()
@@ -38,7 +39,7 @@ struct ContentView: View {
     let authService = AuthenticationService()
     let chatService = ChatService(authService: authService)
     
-    return ContentView()
+    ContentView(selectedThreadID: .constant(nil))
         .environmentObject(authService)
         .environmentObject(chatService)
 }

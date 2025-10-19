@@ -4,8 +4,8 @@ import SwiftUI
 struct MenubarChatView: View {
     @EnvironmentObject var chatService: ChatService
     @State private var query: String = ""
-    @State private var response: String = "Ask me anything!"
     @State private var isLoading: Bool = false
+    @State private var activeThreadID: String? = nil
 
     var body: some View {
         VStack(spacing: 10) {
@@ -13,15 +13,30 @@ struct MenubarChatView: View {
                 .font(.headline)
             
             ScrollView {
-                Text(response)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(8)
+                if let threadID = activeThreadID, let messages = chatService.messages[threadID] {
+                    ForEach(messages) {
+                        MessageView(message: $0)
+                    }
+                } else {
+                    Text("Ask me anything!")
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                }
             }
             .frame(height: 150)
 
-            Spacer() // Pushes the input field to the bottom
+            Spacer()
+            
+            HStack {
+                Button(action: openFullApp) {
+                    Text("Open in App")
+                }
+                Button(action: resetConversation) {
+                    Text("Reset")
+                }
+            }
 
             HStack {
                 TextField("Ask a question...", text: $query)
@@ -43,6 +58,30 @@ struct MenubarChatView: View {
         }
         .padding()
         .frame(width: 400, height: 300)
+        .onAppear(perform: setupNewThreadCallback)
+    }
+
+    private func setupNewThreadCallback() {
+        chatService.onNewThreadCreated = { threadID in
+            self.activeThreadID = threadID
+        }
+    }
+    
+    private func openFullApp() {
+        var urlString = "duo-chat://"
+        if let threadID = activeThreadID {
+            urlString += "thread/\(threadID)"
+        }
+        
+        if let url = URL(string: urlString) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+    
+    private func resetConversation() {
+        query = ""
+        isLoading = false
+        activeThreadID = nil
     }
 
     private func performQuery() {
@@ -52,26 +91,7 @@ struct MenubarChatView: View {
         query = "" // Clear input field immediately
 
         Task {
-            do {
-                // Call the correct method to send the message
-                await chatService.sendMessage(content: currentQuery, threadID: nil)
-                
-                // Observe the chatService.messages for the response
-                // For simplicity, we'll just take the latest assistant message
-                // in the first thread (or a new thread if created).
-                // A more robust solution would involve tracking the specific request.
-                if let latestThread = chatService.threads.first, let messages = chatService.messages[latestThread.id] {
-                    if let lastAssistantMessage = messages.last(where: { $0.role == .assistant }) {
-                        response = lastAssistantMessage.content
-                    } else {
-                        response = "No assistant response yet."
-                    }
-                } else {
-                    response = "No active chat thread or messages."
-                }
-            } catch {
-                response = "Error: \(error.localizedDescription)"
-            }
+            await chatService.sendMessage(content: currentQuery, threadID: activeThreadID)
             isLoading = false
         }
     }

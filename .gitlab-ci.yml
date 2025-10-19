@@ -14,7 +14,7 @@ release:
   script:
     - apk add --no-cache tar
     - echo "Creating source code bundle for version $CI_COMMIT_TAG"
-    - tar -czf "${APP_NAME}-macos-v${CI_COMMIT_TAG}.tar.gz" --exclude=".git" .
+    - tar -czf "${APP_NAME}-macos-v${CI_COMMIT_TAG}.tar.gz" --exclude=".git" --exclude="build" --exclude="${APP_NAME}-macos-v${CI_COMMIT_TAG}.tar.gz" .
     - echo "Creating release..."
     - |
       apk add --no-cache curl jq

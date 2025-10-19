@@ -9,7 +9,7 @@ import SwiftUI
 struct ChatView: View {
     @EnvironmentObject var authService: AuthenticationService
     @EnvironmentObject var chatService: ChatService
-    @State private var selectedThreadID: String?
+    @Binding var selectedThreadID: String?
     @State private var messageText = ""
     @State private var showingSuggestions = false
     @State private var showingCommands = false
@@ -99,7 +99,7 @@ struct ChatView: View {
     let authService = AuthenticationService()
     let chatService = ChatService(authService: authService)
 
-    ChatView()
+    ChatView(selectedThreadID: .constant(nil))
         .environmentObject(authService)
         .environmentObject(chatService)
 }
