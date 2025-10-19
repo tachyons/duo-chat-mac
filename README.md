@@ -50,6 +50,30 @@ GitLab Duo is GitLab's AI-powered assistant that helps developers with coding ta
 - **macOS**: 12.0 or later
 - **Xcode**: 14.0 or later (for development)
 - **Swift**: 5.7 or later (for development)
+- **make**: The `make` command should be available in your shell.
+
+## Build
+
+The project includes a `Makefile` that simplifies common tasks like building, testing, and creating distribution packages.
+
+### Makefile Targets
+
+- `make build`: Build the debug version of the application.
+- `make build-release`: Build the release version and create distributable `.zip` and `.dmg` packages.
+- `make test`: Run both unit and UI tests.
+- `make clean`: Remove all build artifacts.
+- `make install`: Install the release version of the app to the `/Applications` directory.
+- `make run`: Build and run the debug version of the app.
+- `make help`: Show a list of all available `make` targets.
+
+## Homebrew
+
+We are working on making Duo Chat available via Homebrew. The formula is available in this repository, but it is not yet functional. For now, you will need to build from source.
+
+```bash
+# This is a placeholder for the future
+brew install --formula ./HomebrewFormula/duo-chat.rb
+```
 
 ## Setup
 
@@ -60,13 +84,11 @@ GitLab Duo is GitLab's AI-powered assistant that helps developers with coding ta
    cd duo-chat
    ```
 
-3. Open the project in Xcode:
+3. Build and run the project:
    ```bash
-   open duo-chat.xcodeproj
+   make run
    ```
-
-4. Build and run the project (⌘+R)
-5. Sign in with your GitLab credentials when prompted
+4. Sign in with your GitLab credentials when prompted
 
 ## Configuration
 
@@ -80,14 +102,14 @@ The project includes a CI/CD pipeline configured in `.gitlab-ci.yml` for automat
 
 To build locally:
 ```bash
-xcodebuild -project duo-chat.xcodeproj -scheme duo-chat build
+make build
 ```
 
 ### Testing
 
 Run the test suite:
 ```bash
-xcodebuild -project duo-chat.xcodeproj -scheme duo-chat test
+make test
 ```
 
 
